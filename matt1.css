@@ -1,0 +1,27 @@
+pre {
+  white-space: pre-wrap;
+}
+
+.title-slide {
+  background-image: url("pres-figure/HI.png"), url("pres-figure/Rightblox2.png") !important;
+  display: table-cell;
+  background-position: left bottom, right top !important;
+}
+
+.remark-slide-content {
+
+  background-color: #fff;
+  background-position: right top;
+
+  /*background-size: 10020% 100%; */
+  background-image: url("pres-figure/Rightblox2.png");
+  display: table-cell;
+}
+
+.large-text {
+	font-size: 130%
+}
+
+.small-text {
+	font-size: 70%
+}
