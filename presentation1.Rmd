@@ -13,6 +13,11 @@
 ## 27/09/2019
 Matthew.Bass@uhb.nhs.uk
 
+???
+
++ Using R for ~6 months
++ Learned by saying "Let's use R for that"
+
 ---
 
 ## API What?
@@ -20,22 +25,42 @@ Matthew.Bass@uhb.nhs.uk
 <center>
 
 <p>"Application Programming Interface"</p>
+
+???
+
+Sounds complex, but is really...
+
 --
+
 <p>`=`</p>
 
 <p>Method for one thing to talk to another thing</p>
+
+???
+
++ servers and clients
++ databases
++ sounds like...
+
 --
+
 <p>`=`</p>
 
 <p>Websites</p>
 
 </center>
 
+???
+
++ client sends request
++ server sends reply
++ reply contains website
+
 ---
 
 ## Surfing the World Wide Web
 
-```{r load_google, results = "hide", echo = TRUE}
+```{r load_google, results = "hide", echo = TRUE, cache=TRUE}
 # R uses a library called httr to control sending
 # and recieving HTTP requests
 library(httr)
@@ -47,20 +72,34 @@ library(httr)
 webpage.raw <- GET(url="https://www.google.com")
 ```
 
+???
+
++ Access websites in R
++ httr
++ GET()
++ Let's get google...
+
 ---
 
 ## Get: google.com
 
 ![Google Home Page](pres-figure/Google_screen_shot.png)
 
+???
+
+what we are expecting
+
 ---
 
 ## Got: Whatever This Is
 
-
-```{r see_google, echo = FALSE}
+```{r see_google, echo = FALSE, cache=TRUE}
 str(webpage.raw)
 ```
+
+???
+
+and this is what we get from httr
 
 ---
 
@@ -72,13 +111,24 @@ str(webpage.raw)
 - cookies
 - content
 
+???
+
++ the url you asked for
++ status codes like 404. 200 means success
++ any extra stuff you sent
++ content!
+
 ---
 
 ## Content
 
-```{r content_google, echo = FALSE}
+```{r content_google, echo = FALSE, cache=TRUE}
 webpage.raw[["content"]]
 ```
+
+???
+
+it's machine code.jpg
 
 ---
 
@@ -89,11 +139,20 @@ webpage.raw[["content"]]
 content(webpage.raw, "text")
 ```
 
+???
+
+use another part of httr. content().
+
 --
 
-```{r decode_google, echo = FALSE}
+```{r decode_google, echo = FALSE, cache=TRUE}
 content(webpage.raw, "text")
 ```
+
+???
+
++ Success, we have html.
++ summary - send request with GET, decode reply with content().
 
 ---
 
@@ -102,11 +161,17 @@ content(webpage.raw, "text")
 Note: I am not affiliated in any way with the ODS
 ![NHS ODS Front page](pres-figure/ODS_screen_shot.png)
 
+???
+
++ ODS keeps track of all the organisation codes, structures, relationships, addresses, etc.
++ I am not part of it, I'm just using their API
++ Wanted to update our databases quickly
+
 ---
 
 ## NHS ODS ORD API
 
-```{r first_API}
+```{r first_API_1, echo=TRUE, eval=FALSE}
 # The API gives the url of the 'Endpoint':
 #   the address to send requests to the server.
 url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?"
@@ -114,31 +179,63 @@ url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?"
 GET(url = url)
 ```
 
+???
+
++ NHS Acronymns.
++ First part is Website you can visit. Not all APIs do that, but many do.
++ organisations? is the **endpoint** for looking up organisation data
+
+--
+
+```{r first_API_2, cache=TRUE, echo=FALSE}
+# The API gives the url of the 'Endpoint':
+#   the address to send requests to the server.
+url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?"
+
+GET(url = url)
+```
+
+???
+
++ helpful error message. We need parameters.
+
 ---
 
 ## Add Parameters
 
-```{r first_parameters}
+```{r first_parameters, cache=TRUE}
 # Parameters go on the end
 url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?PostCode=B15"
 
 GET(url = url)
 ```
 
+???
+
++ Add the parameters on the end, after the ?.
++ Need to know the API to know what parameters can be used.
++ Added postcode.
+
 ---
 
 ## Our First API Reply
 
-```{r decode_parameters_1, echo = TRUE, warning=FALSE, message=FALSE}
+```{r decode_parameters_1, echo = TRUE, warning=FALSE, message=FALSE, cache=TRUE}
 url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?PostCode=B15"
 API.raw <- GET(url = url)
 API.decoded <- content(API.raw)
 str(API.decoded)
 ```
 
+
+???
+
++ Decode the reply and we get a list of 20 lists
++ Each list is the information about one organisation
+
 ---
 
-```{r decode_parameters_2, warning=FALSE, message=FALSE}
+```{r decode_parameters_2, warning=FALSE, message=FALSE, cache=TRUE}
 library(jsonlite)
 API.decoded <- fromJSON(content(API.raw, 'text'))
 ```
@@ -151,9 +248,17 @@ DT::datatable(API.decoded[["Organisations"]],
                              dom = "<'top'>t<'bottom'>ip"))
 ```
 
+???
+
++ Replies are JSON objects
++ jsonlite reads them really well
++ gives a data.frame instead of lists of lists.
++ There are more than 20. This is default reply number.
++ Need to add another parameter to get more
+
 ---
 
-```{r parameters_list}
+```{r parameters_list, cache=TRUE}
 parameters <- list(PostCode = "B15",
                    Limit = 100)
 
@@ -161,7 +266,7 @@ url <- "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?"
 API.raw <- GET(url = url, query = parameters)
 ```
 
-```{r parameterslist_reply, echo = FALSE, warning=FALSE, message=FALSE}
+```{r parameterslist_reply, echo = FALSE, warning=FALSE, message=FALSE, cache=TRUE}
 API.decoded <- fromJSON(content(API.raw, 'text'))
 #knitr::kable(API.decoded[["Organisations"]])
 DT::datatable(API.decoded[["Organisations"]],
@@ -170,9 +275,20 @@ DT::datatable(API.decoded[["Organisations"]],
                              dom = "<'top'>t<'bottom'>ip"))
 ```
 
+???
+
++ Adding parameters to the url gets stupid.
++ GET has a query argument for this
++ Same postcode, added 'limit' of 100.
++ Get 100 organisations instead of 20.
+
 ---
 
 ## Lessons Learned
+
+???
+
+Some helpful tips I have picked up.
 
 --
 
@@ -198,10 +314,23 @@ DT::datatable(API.decoded[["Organisations"]],
 ---
 
 ## nhsODS R Package
+
+???
+
+Used this to create an R package...
+
+--
+
 .pull-left[
 ![Professionally made nhsODS hex logo](pres-figure/nhsODS_logo.png)
 
 ]
+
+???
+
+still needs a little work
+
+--
 
 .pull-right[
 - Download updated organisation details
@@ -214,9 +343,11 @@ DT::datatable(API.decoded[["Organisations"]],
 - Still not affiliated with the ODS
 ]
 
+--
+
 ```{r install_from_github, eval = FALSE, echo = TRUE}
 library(devtools)
-install_github(repo = "BassEngD/nhsODS")
+install_github(repo = "BassEngD/nhsODS") # Currently a private repo. Need permission to release.
 ```
 
 ---
@@ -227,11 +358,11 @@ install_github(repo = "BassEngD/nhsODS")
 library(nhsODS)
 ```
 
-```{r get_org_1, echo = TRUE, message=FALSE, warning=FALSE, results='hide'}
+```{r get_org_1, echo = TRUE, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 RRK_details <- get_organisation_details("RRK")
 ```
 
-```{r get_org_2, echo = FALSE}
+```{r get_org_2, echo = FALSE, cache=TRUE}
 # str(RRK_details, max.level = 1,
 #     give.attr = FALSE,
 #     no.list = TRUE,
@@ -252,80 +383,6 @@ DT::datatable(RRK_details_summary,
 
 ---
 
-### organisation_details
-
-```{r org_details, echo = FALSE}
-DT::datatable(RRK_details$organisation_details,
-              rownames = FALSE,
-              options = list(scrollX = TRUE,
-                             searching = FALSE,
-                             dom = "<'top'>t<'bottom'>"))
-```
-
-
-### organisation_roles
-
-```{r org_roles, echo = FALSE}
-DT::datatable(RRK_details$organisation_roles,
-              rownames = FALSE,
-              filter = "none",
-              options = list(scrollX = TRUE,
-                             searching = FALSE,
-                             dom = "<'top'>t<'bottom'>"))
-```
-
----
-
-### organisation_relationships
-
-```{r org_rels, echo = FALSE}
-DT::datatable(RRK_details$organisation_relationships,
-              rownames = FALSE,
-              filter = "none",
-              options = list(scrollX = TRUE,
-                             searching = FALSE,
-                             dom = "<'top'>t<'bottom'>"))
-```
-
-### organisation_successors
-
-```{r org_succs, echo = FALSE}
-DT::datatable(RRK_details$organisation_successors,
-              rownames = FALSE,
-              filter = "none",
-              options = list(scrollX = TRUE,
-                             searching = FALSE,
-                             dom = "<'top'>t<'bottom'>"))
-```
-
----
-
-## Parse TRUD XML
-
-```{r parse_xml_1}
-
-xml_document <- parse_ODS_XML("pres-figure/ODS_XML_EG.xml")
-
-```
-
-```{r parse_xml_2, echo = FALSE}
-
-XML_summary <- data.frame(data.frame = names(xml_document),
-                                  observations = sapply(X = xml_document, FUN = nrow),
-                                  variables = sapply(X = xml_document, FUN = ncol),
-                                  stringsAsFactors = FALSE,
-                                  row.names = NULL)
-
-DT::datatable(XML_summary,
-              options = list(scrollX = TRUE,
-                             scrollY = 400,
-                             searching = FALSE,
-                             dom = "<'top'>t<'bottom'>",
-                             pageLength = 15))
-```
-
----
-
 ## APIs in R
 
 .large-text[
@@ -335,7 +392,6 @@ DT::datatable(XML_summary,
 - `content()` to read the reply
 - Reply can be: JSON, XML, csv, and many more
 - Parse the reply into an R-readable format
-- Use data
 - Make packages of useful functions for important APIs
 ]
 Examples: `fingertipsR`, `SPARQL`, `gmailr`
